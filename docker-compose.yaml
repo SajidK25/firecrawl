@@ -63,7 +63,7 @@ services:
     # image: ghcr.io/firecrawl/playwright-service:latest
     build: apps/playwright-service-ts
     environment:
-      PORT: 3000
+      PORT: ${PLAYWRIGHT_PORT:-3000}
       PROXY_SERVER: ${PROXY_SERVER}
       PROXY_USERNAME: ${PROXY_USERNAME}
       PROXY_PASSWORD: ${PROXY_PASSWORD}
@@ -99,15 +99,15 @@ services:
     environment:
       <<: *common-env
       HOST: "0.0.0.0"
-      PORT: ${INTERNAL_PORT:-3002}
+      PORT: ${API_PORT:-3002}
       EXTRACT_WORKER_PORT: ${EXTRACT_WORKER_PORT:-3004}
       WORKER_PORT: ${WORKER_PORT:-3005}
       ENV: local
     depends_on:
       - redis
       - playwright-service
-    ports:
-      - "${PORT:-3002}:${INTERNAL_PORT:-3002}"
+    expose:
+      - 3002
     command: node dist/src/harness.js --start-docker
     # Resource limits for Docker Compose (not Swarm)
     # Increase if you have more CPU cores/RAM available
@@ -115,7 +115,7 @@ services:
     mem_limit: 2G
     memswap_limit: 2G
     healthcheck:
-      test: ["CMD-SHELL", "node -e \"const net = require('net'); const port = process.env.INTERNAL_PORT || 3002; const client = net.connect({ port: port, host: 'localhost' }, () => { client.destroy(); process.exit(0); }); client.on('error', () => { process.exit(1); }); client.setTimeout(2000, () => { client.destroy(); process.exit(1); });\""]
+      test: ["CMD-SHELL", "node -e \"const net = require('net'); const port = process.env.API_PORT || 3002; const client = net.connect({ port: port, host: 'localhost' }, () => { client.destroy(); process.exit(0); }); client.on('error', () => { process.exit(1); }); client.setTimeout(2000, () => { client.destroy(); process.exit(1); });\""]
       interval: 30s
       timeout: 10s
       retries: 5
