@@ -90,6 +90,8 @@ services:
       timeout: 5s
       retries: 5
       start_period: 10s
+    volumes:
+      - playwright-cache:/tmp/.cache
 
   api:
     restart: unless-stopped
@@ -173,6 +175,7 @@ services:
 volumes:
   redis-data:
   postgres-data:
+  playwright-cache:
 
 networks:
   backend:
